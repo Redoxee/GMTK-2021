@@ -902,7 +902,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   JumpImpulse: 25
+  WallJumImpulse: {x: 35, y: 20}
   GroundControl: 5.54
-  AirControl: 2
+  AirControl: 0.5
   MaxHorizontalVelocity: 10.75
   rigidBody: {fileID: 1982748404}

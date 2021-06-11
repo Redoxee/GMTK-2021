@@ -10,18 +10,28 @@ public class Character : MonoBehaviour
     [SerializeField]
     private float JumpImpulse = 1f;
     [SerializeField]
+    private Vector2 WallJumImpulse = new Vector2(4, 4);
+
+    [SerializeField]
     private float GroundControl = 4f;
     [SerializeField]
     private float AirControl = 2f;
     [SerializeField]
     private float MaxHorizontalVelocity = 2f;
 
-
     [SerializeField]
     private Rigidbody2D rigidBody = null;
 
     private bool requestJump = false;
     private float horizontalRequest = 0f;
+    private Vector2 recorderVelocity;
+
+    private Modes mode;
+    public enum Modes
+    {
+        Default,
+        Aiming,
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -29,6 +39,8 @@ public class Character : MonoBehaviour
         movementContactFilter.useLayerMask = true;
         LayerMask layerMask = LayerMask.GetMask("Wall");
         movementContactFilter.SetLayerMask(layerMask);
+
+        mode = Modes.Default;
     }
 
     internal bool IsTouchingDown()
@@ -59,15 +71,52 @@ public class Character : MonoBehaviour
         return false;
     }
 
+    internal float IsTouchingWalls()
+    {
+        float walls = 0f;
+        Vector2 direction = Vector2.right;
+        float rayDistance = 1.7f;
+        int nbContacts = UnityEngine.Physics2D.Raycast(this.transform.position, direction, this.movementContactFilter, this.raycastHits, rayDistance);
+        if (nbContacts > 0)
+        {
+            walls -= 1f;
+        }
+
+        nbContacts = UnityEngine.Physics2D.Raycast(this.transform.position, -direction, this.movementContactFilter, this.raycastHits, rayDistance);
+        if (nbContacts > 0)
+        {
+            walls += 1f;
+        }
+
+        return walls;
+    }
+
     private void MovementsControls()
     {
+        if (this.mode != Modes.Default)
+        {
+            return;
+        }
+
         bool isGrounded = this.IsTouchingDown();
         Vector2 velocity = this.rigidBody.velocity;
         bool changed = false;
-        if (isGrounded && this.requestJump)
+        if (requestJump)
         {
-            velocity.y = this.JumpImpulse;
-            changed = true;
+            if (isGrounded)
+            {
+                velocity.y = this.JumpImpulse;
+                changed = true;
+            }
+            else
+            {
+                float wallJump = this.IsTouchingWalls();
+                if (wallJump != 0f)
+                {
+                    velocity.y = this.WallJumImpulse.y;
+                    velocity.x = wallJump * this.WallJumImpulse.x;
+                }
+            }
         }
 
         if (horizontalRequest != 0f)
@@ -100,6 +149,20 @@ public class Character : MonoBehaviour
         }
 
         this.horizontalRequest = Input.GetAxis("Horizontal");
+
+        bool requestAim = Input.GetButton("Fire1");
+        if (requestAim && this.mode != Modes.Aiming)
+        {
+            this.recorderVelocity = this.rigidBody.velocity;
+            this.rigidBody.bodyType = RigidbodyType2D.Static;
+            this.mode = Modes.Aiming;
+        }
+        else if (!requestAim && this.mode != Modes.Default)
+        {
+            this.rigidBody.bodyType = RigidbodyType2D.Dynamic;
+            this.mode = Modes.Default;
+            this.rigidBody.velocity = this.recorderVelocity;
+        }
     }
 
     void FixedUpdate()
