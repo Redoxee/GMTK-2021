@@ -517,7 +517,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78bf228f9e9e1774ba9abcb21314720d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 100
+  travelDuration: 2
+  speedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  camera: {fileID: 1248721044}
   isShooting: 0
 --- !u!1 &1202041774
 GameObject:
@@ -659,6 +684,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1248721043}
+  - component: {fileID: 1248721044}
   - component: {fileID: 1248721042}
   - component: {fileID: 1248721041}
   m_Layer: 0
@@ -733,6 +759,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1248721044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1248721040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98a2bc6d75ad4e64d9466ba3fd19ab74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dampFactor: 0.1
+  shakeFactor: 1
 --- !u!1 &1378607214
 GameObject:
   m_ObjectHideFlags: 0

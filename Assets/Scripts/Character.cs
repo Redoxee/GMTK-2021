@@ -60,6 +60,9 @@ public class Character : MonoBehaviour
         public float Length;
         public float StartDistance;
         public float EndDistance;
+
+        public Vector2 Normal;
+        public float TurnRate;
     }
 
     // Start is called before the first frame update
@@ -274,6 +277,8 @@ public class Character : MonoBehaviour
                         Position = p1,
                         Direction = dir,
                         StartDistance = traveledDistance,
+                        Normal = rayCastHit.normal,
+                        TurnRate = Vector2.Dot(dir, rayCastHit.normal),
                     };
 
                     this.shootNodes.Add(currentNode);

@@ -10,6 +10,9 @@ public class Projectile : MonoBehaviour
     [SerializeField]
     private AnimationCurve speedCurve;
 
+    [SerializeField]
+    CameraController camera;
+
     public bool isShooting = false;
     private float timer;
     private List<Character.PathNode> path;
@@ -54,6 +57,7 @@ public class Projectile : MonoBehaviour
                     // TODO : Bump;
                     this.currentStep++;
                     step = this.path[this.currentStep];
+                    this.camera.Impulse(step.Normal, step.TurnRate);
                 }
             }
 
