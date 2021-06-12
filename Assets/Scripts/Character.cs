@@ -18,10 +18,16 @@ public class Character : MonoBehaviour
     private float MaxHorizontalVelocity = 2f;
 
     [SerializeField]
+    private float ShootPreviewDistance = 50;
+    [SerializeField]
+    private float ShootDistance = 100;
+
+    [SerializeField]
     private Rigidbody2D rigidBody = null;
 
     [SerializeField]
     private LineRenderer shootPreview = null;
+
 
     private bool requestJump = false;
     private float horizontalRequest = 0f;
@@ -204,19 +210,34 @@ public class Character : MonoBehaviour
             Vector2 dir = this.TrueAimVector;
             this.shootPreview.positionCount = 1;
             this.shootPreview.SetPosition(0, p1);
+            float remainingDist = this.ShootDistance;
 
-            for (int i = 0; i < 3; ++i)
+            for (int i = 0; i < 40; ++i)
             {
                 int hit = Physics2D.Raycast(p1 + (dir * .001f), dir, this.shootContactFilter, this.raycastHits);
                 if (hit == 0)
                 {
+                    remainingDist = 0;
                     break;
                 }
 
-                p1 = this.raycastHits[0].point;
-                dir += 2 * this.raycastHits[0].normal;
-                this.shootPreview.positionCount++;
-                this.shootPreview.SetPosition(this.shootPreview.positionCount - 1, p1);
+
+                if (remainingDist >= this.raycastHits[0].distance)
+                {
+                    p1 = this.raycastHits[0].point;
+                    dir += 2 * this.raycastHits[0].normal;
+                    dir.Normalize();
+                    this.shootPreview.positionCount++;
+                    this.shootPreview.SetPosition(this.shootPreview.positionCount - 1, p1);
+                    remainingDist -= this.raycastHits[0].distance;
+                }
+                else
+                {
+                    this.shootPreview.positionCount++;
+                    this.shootPreview.SetPosition(this.shootPreview.positionCount - 1, p1 + dir * remainingDist);
+                    remainingDist = 0;
+                    break;
+                }
             }
         }
         else if (this.shootPreview.enabled)
