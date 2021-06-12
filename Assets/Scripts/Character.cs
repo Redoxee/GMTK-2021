@@ -43,8 +43,10 @@ public class Character : MonoBehaviour
     private ContactFilter2D movementContactFilter = new ContactFilter2D();
 
     private ContactFilter2D shootContactFilter = new ContactFilter2D();
+    private ContactFilter2D triggerContactFilter = new ContactFilter2D();
 
-    private System.Collections.Generic.List<PathNode> shootNodes = new List<PathNode>();
+    private List<PathNode> shootNodes = new List<PathNode>();
+    private List<TriggerHit> triggerHitted = new List<TriggerHit>();
 
     private Modes mode;
     public enum Modes
@@ -65,6 +67,12 @@ public class Character : MonoBehaviour
         public float TurnRate;
     }
 
+    public class TriggerHit
+    {
+        public GameObject Trigger;
+        public float DistanceHitted;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -72,6 +80,9 @@ public class Character : MonoBehaviour
         LayerMask layerMask = LayerMask.GetMask("Wall");
         this.movementContactFilter.SetLayerMask(layerMask);
         this.shootContactFilter.SetLayerMask(layerMask);
+        LayerMask triggerLayer = LayerMask.GetMask("Water");
+        this.triggerContactFilter.SetLayerMask(triggerLayer);
+        this.triggerContactFilter.useTriggers = true;
 
         mode = Modes.Default;
     }
@@ -196,7 +207,7 @@ public class Character : MonoBehaviour
             this.rigidBody.bodyType = RigidbodyType2D.Dynamic;
             this.mode = Modes.Default;
             this.rigidBody.velocity = this.recorderVelocity;
-            this.projectile.Shoot(this.shootNodes, this.ShootDistance);
+            this.projectile.Shoot(this.shootNodes, this.ShootDistance, this.triggerHitted);
             this.canShoot = false;
         }
 
@@ -229,6 +240,7 @@ public class Character : MonoBehaviour
             this.shootPreview.SetPosition(0, p1);
             float remainingDist = this.ShootDistance;
             this.shootNodes.Clear();
+            this.triggerHitted.Clear();
             float traveledDistance = 0f;
 
             PathNode currentNode = new PathNode
@@ -242,6 +254,34 @@ public class Character : MonoBehaviour
 
             for (int i = 0; i < 40; ++i)
             {
+                int triggerHit = Physics2D.Raycast(p1 + (dir * .001f), dir, this.triggerContactFilter, this.raycastHits);
+                if (triggerHit > 0)
+                {
+                    for (int triggerIndex = 0; triggerIndex < triggerHit; ++triggerIndex)
+                    {
+                        ref RaycastHit2D h = ref this.raycastHits[triggerIndex];
+                        bool contained = false;
+                        foreach (var hitted in this.triggerHitted)
+                        {
+                            if (hitted.Trigger == h.transform.gameObject)
+                            {
+                                contained = true;
+                                break;
+                            }
+                        }
+
+                        if (contained)
+                        {
+                            continue;
+                        }
+
+                        this.triggerHitted.Add(new TriggerHit {
+                            Trigger = h.transform.gameObject,
+                            DistanceHitted = traveledDistance + h.distance,
+                        });
+                    }
+                }
+
                 int hit = Physics2D.Raycast(p1 + (dir * .001f), dir, this.shootContactFilter, this.raycastHits);
                 if (hit == 0)
                 {
