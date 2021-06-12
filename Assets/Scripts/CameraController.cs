@@ -24,7 +24,6 @@ public class CameraController : MonoBehaviour
 
     public void Impulse(Vector2 direction, float force)
     {
-        Debug.Log($"Impulse {direction}");
         Vector3 dir = new Vector3(direction.x, direction.y, 0) * force;
         this.transform.position += dir * this.shakeFactor;
         this.currentVelocity += dir * this.shakeVelocityFactor;

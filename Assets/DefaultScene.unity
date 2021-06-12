@@ -729,7 +729,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 20
+  orthographic size: 25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -773,6 +773,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dampFactor: 0.1
   shakeFactor: 1
+  shakeVelocityFactor: 10
 --- !u!1 &1378607214
 GameObject:
   m_ObjectHideFlags: 0
