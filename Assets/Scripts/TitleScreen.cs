@@ -8,7 +8,7 @@ public class TitleScreen : MonoBehaviour
     {
         if (Input.anyKey)
         {
-            UnityEngine.SceneManagement.SceneManager.LoadScene(1);
+            MainScene.LoadNextScene();
         }
     }
 }

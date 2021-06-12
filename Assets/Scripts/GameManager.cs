@@ -12,8 +12,6 @@ public class GameManager : MonoBehaviour
 
     public Transform ConvergeTransform = null;
 
-    public int NextSceneIndex = -1;
-
     private List<Vector3> recordedPositions = new List<Vector3>();
 
     private float timer;
@@ -64,9 +62,9 @@ public class GameManager : MonoBehaviour
             this.KeysTransforms[index].position = this.recordedPositions[id++] * factor + converge;
         }
 
-        if (this.timer > this.EndAnimationDuration && this.NextSceneIndex >= 0)
+        if (this.timer > this.EndAnimationDuration)
         {
-            UnityEngine.SceneManagement.SceneManager.LoadScene(this.NextSceneIndex);
+            MainScene.LoadNextScene();
         }
     }
 }

@@ -81,11 +81,10 @@ public class Character : MonoBehaviour
     void Start()
     {
         this.movementContactFilter.useLayerMask = true;
-        LayerMask layerMask = LayerMask.GetMask("Wall");
-        this.movementContactFilter.SetLayerMask(layerMask);
-        this.shootContactFilter.SetLayerMask(layerMask);
-        LayerMask triggerLayer = LayerMask.GetMask("Water");
-        this.triggerContactFilter.SetLayerMask(triggerLayer);
+        this.movementContactFilter.SetLayerMask(LayerMask.GetMask("Wall") + LayerMask.GetMask("UI"));
+        
+        this.shootContactFilter.SetLayerMask(LayerMask.GetMask("Wall"));
+        this.triggerContactFilter.SetLayerMask(LayerMask.GetMask("Water"));
         this.triggerContactFilter.useTriggers = true;
 
         mode = Modes.Default;
@@ -123,14 +122,16 @@ public class Character : MonoBehaviour
     {
         float walls = 0f;
         Vector2 direction = Vector2.right;
-        float rayDistance = 1.7f;
+        float rayDistance = 1.5f;
         int nbContacts = UnityEngine.Physics2D.Raycast(this.transform.position, direction, this.movementContactFilter, this.raycastHits, rayDistance);
+        Debug.DrawLine(this.transform.position, this.transform.position + (new Vector3(direction.x, direction.y, 0) * rayDistance));
         if (nbContacts > 0)
         {
             walls -= 1f;
         }
 
         nbContacts = UnityEngine.Physics2D.Raycast(this.transform.position, -direction, this.movementContactFilter, this.raycastHits, rayDistance);
+        Debug.DrawLine(this.transform.position, this.transform.position - (new Vector3(direction.x, direction.y, 0) * rayDistance));
         if (nbContacts > 0)
         {
             walls += 1f;
@@ -163,6 +164,7 @@ public class Character : MonoBehaviour
                 {
                     velocity.y = this.WallJumImpulse.y;
                     velocity.x = wallJump * this.WallJumImpulse.x;
+                    changed = true;
                 }
             }
         }

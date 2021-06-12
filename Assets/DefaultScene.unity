@@ -235,5 +235,30 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2273999791204543445, guid: bfe16c7e7111256458b235cdd263ea17,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2709709603262196265, guid: bfe16c7e7111256458b235cdd263ea17,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3883085992134834075, guid: bfe16c7e7111256458b235cdd263ea17,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6427234231923030917, guid: bfe16c7e7111256458b235cdd263ea17,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7550133414603385196, guid: bfe16c7e7111256458b235cdd263ea17,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bfe16c7e7111256458b235cdd263ea17, type: 3}
