@@ -7,6 +7,8 @@ public class Projectile : MonoBehaviour
     [SerializeField]
     private float travelDuration = 2f;
 
+    private float endDelayHide = 1f;
+
     [SerializeField]
     private AnimationCurve speedCurve;
 
@@ -15,6 +17,9 @@ public class Projectile : MonoBehaviour
 
     [SerializeField]
     LineRenderer LinkRenderer = null;
+
+    [SerializeField]
+    GameManager GameManager = null;
 
     public bool isShooting = false;
     private float timer;
@@ -49,6 +54,19 @@ public class Projectile : MonoBehaviour
     {
         if (!this.isShooting)
         {
+            if (this.timer > 0)
+            {
+                this.timer -= Time.deltaTime;
+                if (timer <= 0)
+                {
+                    this.gameObject.SetActive(false);
+                    if (this.currentTrigger < 2)
+                    {
+                        this.LinkRenderer.positionCount = 0;
+                    }
+                }
+            }
+
             return;
         }
 
@@ -76,12 +94,10 @@ public class Projectile : MonoBehaviour
             {
                 while (newDist > step.EndDistance && this.currentStep < this.path.Count - 1)
                 {
-                    // TODO : Bump;
                     this.currentStep++;
                     step = this.path[this.currentStep];
                     this.camera.Impulse(step.Normal, step.TurnRate);
 
-                    Debug.Log($"TriggerHit {this.triggerHits.Count} - current trigger {this.currentTrigger}");
                     if (this.LinkRenderer.positionCount > 1 && this.currentTrigger < 2)
                     {
                         this.LinkRenderer.SetPosition(this.LinkRenderer.positionCount - 1, step.Position);
@@ -101,6 +117,11 @@ public class Projectile : MonoBehaviour
             Vector2 endPos = lastStep.Position + lastStep.Direction * lastStep.Length;
             this.transform.position = endPos;
             this.isShooting = false;
+            this.timer = this.endDelayHide;
+            if (this.currentTrigger == 2)
+            {
+                this.GameManager.StartEndTransition();
+            }
         }
 
         if (this.currentTrigger < 2)

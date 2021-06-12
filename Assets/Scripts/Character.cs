@@ -31,6 +31,8 @@ public class Character : MonoBehaviour
     [SerializeField]
     private Projectile projectile = null;
 
+    public bool InhibShot = false;
+
     private bool requestJump = false;
     private float horizontalRequest = 0f;
     private Vector2 recorderVelocity;
@@ -194,13 +196,16 @@ public class Character : MonoBehaviour
 
         this.horizontalRequest = Input.GetAxis("Horizontal");
 
-        bool requestAim = Input.GetButton("Fire1");
+        bool requestAim = Input.GetButton("Fire1") && !this.InhibShot;
         if (requestAim && this.mode == Modes.Default)
         {
-            this.recorderVelocity = this.rigidBody.velocity;
-            this.rigidBody.bodyType = RigidbodyType2D.Static;
-            this.mode = Modes.Aiming;
-            this.canShoot = false;
+            if (!this.projectile.isShooting)
+            {
+                this.recorderVelocity = this.rigidBody.velocity;
+                this.rigidBody.bodyType = RigidbodyType2D.Static;
+                this.mode = Modes.Aiming;
+                this.canShoot = false;
+            }
         }
         else if (!requestAim && this.mode == Modes.Aiming)
         {
