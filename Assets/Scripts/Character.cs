@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Character : MonoBehaviour
 {
-    private RaycastHit2D[] raycastHits = new RaycastHit2D[1];
-    private ContactFilter2D movementContactFilter = new ContactFilter2D();
 
     [SerializeField]
     private float JumpImpulse = 1f;
@@ -22,9 +20,21 @@ public class Character : MonoBehaviour
     [SerializeField]
     private Rigidbody2D rigidBody = null;
 
+    [SerializeField]
+    private LineRenderer shootPreview = null;
+
     private bool requestJump = false;
     private float horizontalRequest = 0f;
     private Vector2 recorderVelocity;
+
+    private Vector2 AimVector = new Vector2();
+    private bool canShoot;
+    private Vector2 TrueAimVector = new Vector2();
+
+    private RaycastHit2D[] raycastHits = new RaycastHit2D[1];
+    private ContactFilter2D movementContactFilter = new ContactFilter2D();
+
+    private ContactFilter2D shootContactFilter = new ContactFilter2D();
 
     private Modes mode;
     public enum Modes
@@ -36,9 +46,10 @@ public class Character : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        movementContactFilter.useLayerMask = true;
+        this.movementContactFilter.useLayerMask = true;
         LayerMask layerMask = LayerMask.GetMask("Wall");
-        movementContactFilter.SetLayerMask(layerMask);
+        this.movementContactFilter.SetLayerMask(layerMask);
+        this.shootContactFilter.SetLayerMask(layerMask);
 
         mode = Modes.Default;
     }
@@ -156,17 +167,61 @@ public class Character : MonoBehaviour
             this.recorderVelocity = this.rigidBody.velocity;
             this.rigidBody.bodyType = RigidbodyType2D.Static;
             this.mode = Modes.Aiming;
+            this.canShoot = false;
         }
         else if (!requestAim && this.mode != Modes.Default)
         {
             this.rigidBody.bodyType = RigidbodyType2D.Dynamic;
             this.mode = Modes.Default;
             this.rigidBody.velocity = this.recorderVelocity;
+            this.canShoot = false;
+        }
+
+        if (this.mode == Modes.Aiming)
+        {
+            this.AimVector.x = this.horizontalRequest;
+            this.AimVector.y = Input.GetAxis("Vertical");
+            if (this.AimVector.sqrMagnitude != 0)
+            {
+                this.TrueAimVector = this.AimVector.normalized;
+                this.canShoot = true;
+            }
         }
     }
 
     void FixedUpdate()
     {
-        this.MovementsControls();   
+        this.MovementsControls();
+
+        if (this.canShoot)
+        {
+            if (!this.shootPreview.enabled)
+            {
+                this.shootPreview.enabled = true;
+            }
+
+            Vector2 p1 = this.transform.position;
+            Vector2 dir = this.TrueAimVector;
+            this.shootPreview.positionCount = 1;
+            this.shootPreview.SetPosition(0, p1);
+
+            for (int i = 0; i < 3; ++i)
+            {
+                int hit = Physics2D.Raycast(p1 + (dir * .001f), dir, this.shootContactFilter, this.raycastHits);
+                if (hit == 0)
+                {
+                    break;
+                }
+
+                p1 = this.raycastHits[0].point;
+                dir += 2 * this.raycastHits[0].normal;
+                this.shootPreview.positionCount++;
+                this.shootPreview.SetPosition(this.shootPreview.positionCount - 1, p1);
+            }
+        }
+        else if (this.shootPreview.enabled)
+        {
+            this.shootPreview.enabled = false;
+        }
     }
 }
