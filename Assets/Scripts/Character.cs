@@ -50,6 +50,8 @@ public class Character : MonoBehaviour
     private List<PathNode> shootNodes = new List<PathNode>();
     private List<TriggerHit> triggerHitted = new List<TriggerHit>();
 
+    private float coyoteTime = 0;
+
     private Modes mode;
     public enum Modes
     {
@@ -149,7 +151,7 @@ public class Character : MonoBehaviour
         bool changed = false;
         if (requestJump)
         {
-            if (isGrounded)
+            if (isGrounded || this.coyoteTime > 0)
             {
                 velocity.y = this.JumpImpulse;
                 changed = true;
@@ -185,6 +187,15 @@ public class Character : MonoBehaviour
         }
 
         this.requestJump = false;
+
+        if (isGrounded)
+        {
+            this.coyoteTime = .2f;
+        }
+        else if(this.coyoteTime > 0)
+        {
+            this.coyoteTime -= Time.fixedDeltaTime;
+        }
     }
 
     private void Update()
