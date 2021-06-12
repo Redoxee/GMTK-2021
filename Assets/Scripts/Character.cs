@@ -28,6 +28,8 @@ public class Character : MonoBehaviour
     [SerializeField]
     private LineRenderer shootPreview = null;
 
+    [SerializeField]
+    private Projectile projectile = null;
 
     private bool requestJump = false;
     private float horizontalRequest = 0f;
@@ -37,16 +39,27 @@ public class Character : MonoBehaviour
     private bool canShoot;
     private Vector2 TrueAimVector = new Vector2();
 
-    private RaycastHit2D[] raycastHits = new RaycastHit2D[1];
+    private RaycastHit2D[] raycastHits = new RaycastHit2D[10];
     private ContactFilter2D movementContactFilter = new ContactFilter2D();
 
     private ContactFilter2D shootContactFilter = new ContactFilter2D();
+
+    private System.Collections.Generic.List<PathNode> shootNodes = new List<PathNode>();
 
     private Modes mode;
     public enum Modes
     {
         Default,
         Aiming,
+    }
+
+    public class PathNode
+    {
+        public Vector2 Position;
+        public Vector2 Direction;
+        public float Length;
+        public float StartDistance;
+        public float EndDistance;
     }
 
     // Start is called before the first frame update
@@ -168,18 +181,19 @@ public class Character : MonoBehaviour
         this.horizontalRequest = Input.GetAxis("Horizontal");
 
         bool requestAim = Input.GetButton("Fire1");
-        if (requestAim && this.mode != Modes.Aiming)
+        if (requestAim && this.mode == Modes.Default)
         {
             this.recorderVelocity = this.rigidBody.velocity;
             this.rigidBody.bodyType = RigidbodyType2D.Static;
             this.mode = Modes.Aiming;
             this.canShoot = false;
         }
-        else if (!requestAim && this.mode != Modes.Default)
+        else if (!requestAim && this.mode == Modes.Aiming)
         {
             this.rigidBody.bodyType = RigidbodyType2D.Dynamic;
             this.mode = Modes.Default;
             this.rigidBody.velocity = this.recorderVelocity;
+            this.projectile.Shoot(this.shootNodes, this.ShootDistance);
             this.canShoot = false;
         }
 
@@ -211,6 +225,17 @@ public class Character : MonoBehaviour
             this.shootPreview.positionCount = 1;
             this.shootPreview.SetPosition(0, p1);
             float remainingDist = this.ShootDistance;
+            this.shootNodes.Clear();
+            float traveledDistance = 0f;
+
+            PathNode currentNode = new PathNode
+            {
+                Position = p1,
+                Direction = dir,
+                StartDistance = 0,
+            };
+
+            this.shootNodes.Add(currentNode);
 
             for (int i = 0; i < 40; ++i)
             {
@@ -221,18 +246,43 @@ public class Character : MonoBehaviour
                     break;
                 }
 
-
-                if (remainingDist >= this.raycastHits[0].distance)
+                int hitIndex = 0;
+                for (int index = 1; index < hit; ++index)
                 {
-                    p1 = this.raycastHits[0].point;
-                    dir += 2 * this.raycastHits[0].normal;
+                    if (this.raycastHits[index].distance < this.raycastHits[hitIndex].distance)
+                    {
+                        hitIndex = index;
+                    }
+                }
+
+                ref RaycastHit2D rayCastHit = ref this.raycastHits[hitIndex];
+
+                if (remainingDist >= rayCastHit.distance)
+                {
+                    p1 = rayCastHit.point;
+                    dir += 2 * rayCastHit.normal;
                     dir.Normalize();
                     this.shootPreview.positionCount++;
                     this.shootPreview.SetPosition(this.shootPreview.positionCount - 1, p1);
-                    remainingDist -= this.raycastHits[0].distance;
+                    remainingDist -= rayCastHit.distance;
+                    traveledDistance += rayCastHit.distance;
+
+                    currentNode.Length = rayCastHit.distance;
+                    currentNode.EndDistance = traveledDistance;
+                    currentNode = new PathNode
+                    {
+                        Position = p1,
+                        Direction = dir,
+                        StartDistance = traveledDistance,
+                    };
+
+                    this.shootNodes.Add(currentNode);
                 }
                 else
                 {
+                    currentNode.Length = remainingDist;
+                    currentNode.EndDistance = this.ShootDistance;
+
                     this.shootPreview.positionCount++;
                     this.shootPreview.SetPosition(this.shootPreview.positionCount - 1, p1 + dir * remainingDist);
                     remainingDist = 0;
