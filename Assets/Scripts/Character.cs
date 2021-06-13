@@ -83,6 +83,7 @@ public class Character : MonoBehaviour
     {
         public GameObject Trigger;
         public float DistanceHitted;
+        public float Length;
     }
 
     // Start is called before the first frame update
@@ -310,6 +311,7 @@ public class Character : MonoBehaviour
             for (int i = 0; i < 40; ++i)
             {
                 int triggerHit = Physics2D.Raycast(p1 + (dir * .001f), dir, this.triggerContactFilter, this.raycastHits);
+                int triggerAdded = 0;
                 if (triggerHit > 0)
                 {
                     for (int triggerIndex = 0; triggerIndex < triggerHit; ++triggerIndex)
@@ -333,7 +335,10 @@ public class Character : MonoBehaviour
                         this.triggerHitted.Add(new TriggerHit {
                             Trigger = h.transform.gameObject,
                             DistanceHitted = traveledDistance + h.distance,
+                            Length = h.distance,
                         });
+
+                        triggerAdded++;
                     }
                 }
 
@@ -377,6 +382,19 @@ public class Character : MonoBehaviour
                     };
 
                     this.shootNodes.Add(currentNode);
+
+                    if (triggerAdded > 0)
+                    {
+                        int c = this.triggerHitted.Count - 1;
+                        for (int t = 0; t < triggerAdded; ++t)
+                        {
+                            TriggerHit inspectedTrigger = this.triggerHitted[c - t];
+                            if (inspectedTrigger.Length > rayCastHit.distance)
+                            {
+                                this.triggerHitted.RemoveAt(c - t);
+                            }
+                        }
+                    }
                 }
                 else
                 {
