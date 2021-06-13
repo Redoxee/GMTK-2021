@@ -1632,6 +1632,7 @@ MonoBehaviour:
   rigidBody: {fileID: 2041421749194545964}
   shootPreview: {fileID: 2041421749087818782}
   projectile: {fileID: 2041421747796123788}
+  camera: {fileID: 2041421749525738826}
   InhibShot: 0
 --- !u!114 &2041421749194545952
 MonoBehaviour:

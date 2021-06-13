@@ -31,6 +31,9 @@ public class Character : MonoBehaviour
     [SerializeField]
     private Projectile projectile = null;
 
+    [SerializeField]
+    private Camera camera = null;
+
     public bool InhibShot = false;
 
     private bool requestJump = false;
@@ -51,6 +54,9 @@ public class Character : MonoBehaviour
     private List<TriggerHit> triggerHitted = new List<TriggerHit>();
 
     private float coyoteTime = 0;
+
+    private bool isMouseAiming = false;
+    private Vector2 mouseDownPos;
 
     private Modes mode;
     public enum Modes
@@ -209,7 +215,9 @@ public class Character : MonoBehaviour
 
         this.horizontalRequest = Input.GetAxis("Horizontal");
 
-        bool requestAim = Input.GetButton("Fire1") && !this.InhibShot;
+        bool mouseAim = Input.GetButton("Fire1Mouse");
+        bool requestAim = Input.GetButton("Fire1") || mouseAim;
+        requestAim &= !this.InhibShot;
         if (requestAim && this.mode == Modes.Default)
         {
             if (!this.projectile.isShooting)
@@ -218,6 +226,12 @@ public class Character : MonoBehaviour
                 this.rigidBody.bodyType = RigidbodyType2D.Static;
                 this.mode = Modes.Aiming;
                 this.canShoot = false;
+
+                if (mouseAim)
+                {
+                    this.isMouseAiming = true;
+                    this.mouseDownPos = Input.mousePosition;
+                }
             }
         }
         else if (!requestAim && this.mode == Modes.Aiming)
@@ -227,12 +241,29 @@ public class Character : MonoBehaviour
             this.rigidBody.velocity = this.recorderVelocity;
             this.projectile.Shoot(this.shootNodes, this.ShootDistance, this.triggerHitted);
             this.canShoot = false;
+            this.isMouseAiming = false;
         }
 
         if (this.mode == Modes.Aiming)
         {
-            this.AimVector.x = this.horizontalRequest;
-            this.AimVector.y = Input.GetAxis("Vertical");
+            if (!this.isMouseAiming)
+            {
+                this.AimVector.x = this.horizontalRequest;
+                this.AimVector.y = Input.GetAxis("Vertical");
+            }
+            else
+            {
+                Vector2 mousePos = Input.mousePosition;
+                if (mousePos != this.mouseDownPos)
+                {
+                    this.AimVector = this.camera.ScreenToWorldPoint(Input.mousePosition) - this.transform.position;
+                }
+                else
+                {
+                    this.AimVector.x = 0; this.AimVector.y = 0;
+                }
+            }
+
             if (this.AimVector.sqrMagnitude != 0)
             {
                 this.TrueAimVector = this.AimVector.normalized;
