@@ -58,6 +58,8 @@ public class Character : MonoBehaviour
     private bool isMouseAiming = false;
     private Vector2 mouseDownPos;
 
+    private AudioManager audioManager;
+
     private Modes mode;
     public enum Modes
     {
@@ -94,6 +96,8 @@ public class Character : MonoBehaviour
         this.triggerContactFilter.useTriggers = true;
 
         mode = Modes.Default;
+
+        this.audioManager = AudioManager.Instance;
     }
 
     internal bool IsTouchingDown()
@@ -162,6 +166,7 @@ public class Character : MonoBehaviour
             {
                 velocity.y = this.JumpImpulse;
                 changed = true;
+                this.audioManager.Jump();
             }
             else
             {
@@ -171,6 +176,7 @@ public class Character : MonoBehaviour
                     velocity.y = this.WallJumImpulse.y;
                     velocity.x = wallJump * this.WallJumImpulse.x;
                     changed = true;
+                    this.audioManager.Jump();
                 }
             }
         }

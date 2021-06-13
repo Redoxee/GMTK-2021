@@ -36,6 +36,8 @@ public class GameManager : MonoBehaviour
             this.recordedPositions.Add(this.KeysTransforms[index].position);
         }
 
+        AudioManager.Instance.Victory();
+
         this.isAnimatingEnd = true;
         this.timer = 0;
     }

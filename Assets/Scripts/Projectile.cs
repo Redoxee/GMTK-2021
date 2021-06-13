@@ -30,8 +30,11 @@ public class Projectile : MonoBehaviour
 
     private float shootDistance;
 
+    private AudioManager audioManager;
+
     void Start()
     {
+        this.audioManager = AudioManager.Instance;
     }
 
     internal void Shoot(List<Character.PathNode> path, float totalDistance, List<Character.TriggerHit> triggerHits)
@@ -83,6 +86,7 @@ public class Projectile : MonoBehaviour
                 this.LinkRenderer.SetPosition(this.LinkRenderer.positionCount - 1, triggerHit.Trigger.transform.position);
                 this.LinkRenderer.positionCount++;
                 this.LinkRenderer.SetPosition(this.LinkRenderer.positionCount - 1, triggerHit.Trigger.transform.position);
+                this.audioManager.Collectible();
             }
         }
 
@@ -92,18 +96,24 @@ public class Projectile : MonoBehaviour
             Character.PathNode step = this.path[this.currentStep];
             if (newDist > step.EndDistance)
             {
+                bool hasBumped = false;
                 while (newDist > step.EndDistance && this.currentStep < this.path.Count - 1)
                 {
                     this.currentStep++;
                     step = this.path[this.currentStep];
                     this.camera.Impulse(step.Normal, step.TurnRate);
-
+                    hasBumped = true;
                     if (this.LinkRenderer.positionCount > 1 && this.currentTrigger < 2)
                     {
                         this.LinkRenderer.SetPosition(this.LinkRenderer.positionCount - 1, step.Position);
                         this.LinkRenderer.positionCount++;
                         this.LinkRenderer.SetPosition(this.LinkRenderer.positionCount - 1, step.Position);
                     }
+                }
+
+                if (hasBumped)
+                {
+                    this.audioManager.Bump();
                 }
             }
 
